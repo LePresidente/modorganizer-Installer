@@ -3,6 +3,8 @@
 
 #include "MO2-Config.iss"
 
+#define use_vc2017
+
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application.
 ; Do not use the same AppId value in installers for other applications.
@@ -12,6 +14,7 @@ AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;We should only allow installing on 64bit systems
 ArchitecturesAllowed=x64
+ ArchitecturesInstallIn64BitMode=x64
 ;AppVerName={#MyAppName} {#MyAppVersion}
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
@@ -20,6 +23,7 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName={sd}\Modding\MO2
 DirExistsWarning=no
 DefaultGroupName={#MyAppName}
+PrivilegesRequired=admin
 AllowNoIcons=yes
 LicenseFile=..\..\..\..\install\bin\licenses\GPL-v3.0.txt
 OutputDir={#MO2Folder}
@@ -32,8 +36,27 @@ CreateUninstallRegKey=no
 UninstallDisplayIcon={app}\ModOrganizer.exe
 UninstallDisplayName=Mod Organizer 2
 
+; downloading and installing dependencies will only work if the memo/ready page is enabled (default and current behaviour)
+DisableReadyPage=no
+DisableReadyMemo=no
+
+[CustomMessages]
+; shared code for installing the products
+#include "Scripts\innodependencyinstaller\products.iss"
+
+; helper functions
+#include "Scripts\innodependencyinstaller\products\stringversion.iss"
+#include "Scripts\innodependencyinstaller\products\winversion.iss"
+#include "Scripts\innodependencyinstaller\products\fileversion.iss"
+#include "Scripts\innodependencyinstaller\products\dotnetfxversion.iss"
+
+#ifdef use_vc2017
+#include "Scripts\innodependencyinstaller\products\msiproduct.iss"
+#include "Scripts\innodependencyinstaller\products\vcredist2017.iss"
+#endif
+
 [Languages]
-Name: "english"; MessagesFile: "compiler:Default.isl"
+Name: "en"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
@@ -220,9 +243,6 @@ Type: filesandordirs; Name: "{app}/uibase.dll"
 Type: filesandordirs; Name: "{app}/uninstall.exe"
 Type: filesandordirs; Name: "{app}/usvfs_*"
 
-[Dirs]
-Name: "{app}\Logs\logs"; Components: core
-
 [UninstallDelete]
 Type: filesandordirs; Name: "{app}/pythoncore"
 Type: filesandordirs; Name: "{app}/plugins"
@@ -328,3 +348,5 @@ begin
     end
   end
 end;
+
+#include "Scripts\innodependencyinstaller\innodependencyinstaller.pas"
